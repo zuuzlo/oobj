@@ -362,7 +362,7 @@ class Blackjack
 
   def card_shuffle(nu_decks)
     @deck = Deck.new(nu_decks)
-    #TODO uncomment @deck.shuffle
+    @deck.shuffle
     puts "#{@players[rand(@players.length.to_i)].name}, would you like to cut the cards? (y/n)"
     cuts_answer = gets.chomp
     if cuts_answer == "y"
@@ -425,7 +425,7 @@ class Blackjack
            player.hand_played[num] = true
            hit = false
           elsif action == "p" && hand.number_of_cards == 2 && hand.hand_can_split? && player.bet_size[num] < player.money_can_bet
-            #TODO code for spliting cards         
+            #code for spliting cards         
             @temp = Hand.new
             @temp_hand_number = num + "a"
             @temp_player = player.name
@@ -464,7 +464,7 @@ class Blackjack
       #binding.pry
       @redo_player_loop = false
       player_loop
-      #TODO get players hands straight : recall loop 
+      #get players hands straight for split : recall loop 
     end
   end
 
@@ -557,7 +557,7 @@ class Blackjack
   end
 
   def clear_hands
-    #TODO remove any hands that have an "a" on the key along with bets and hand_played
+    #remove any hands that have an "a" on the key along with bets and hand_played split hands
     @players.each do | player |
       player.player_hand.each do | num, hand |
         #binding.pry
