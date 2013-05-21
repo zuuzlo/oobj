@@ -50,7 +50,7 @@ class Deck
   end
 
   def in_deck
-    @cards.length
+    @cards.size
   end
 
   def next_card
@@ -212,15 +212,18 @@ class Blackjack
     get_players
     buy_in
     introduction
-    bet_on_hand
     card_shuffle(@how_many_decks.to_i)
-    first_deal
-    player_loop
-    dealer_loop
-    win_lose
-    do_it_again
+    @play = true
+    while @play
+      bet_on_hand
+      first_deal
+      player_loop
+      dealer_loop
+      win_lose
+      do_it_again
+    end
   end
-
+=begin
   def replay
     clear_hands
     bet_on_hand
@@ -230,7 +233,7 @@ class Blackjack
     win_lose
     do_it_again
   end
-  
+=end  
   def get_players
     
     while true
@@ -403,7 +406,9 @@ class Blackjack
         hit = false if (hand.hand_blackjack? || @dealer.hand_blackjack?) || @redo_player_loop || player.hand_played[num]
 
         while hit
+          puts
           puts show_cards_each(player, hand, num)
+          puts
           #binding.pry
           if hand.number_of_cards == 2 && hand.hand_can_split? && player.bet_size[num] < player.money_can_bet
             puts "==> #{player.name}, Hit, Stay, Split or Double Down? (h-Hit, s-Stay, p-Split or d-Double Down)"
@@ -433,9 +438,8 @@ class Blackjack
             @temp.get_card(hand.hand_split)
             hand.get_card(@deck.deal_card)
             @temp.get_card(@deck.deal_card) 
-            @redo_player_loop = true         
+            @redo_player_loop = true        
           else
-            @dealer_hits << true
             player.hand_played[num] = true
             hit = false
           end
@@ -444,11 +448,12 @@ class Blackjack
             puts "With a total #{hand.hand_total}"
             puts
             @dealer_hits << false
-            player.player_hand[num] = true
+            player.hand_played[num] = true
             hit = false
+          else
+            @dealer_hits << true
           end
         end
-        puts "__________________________________________________________________________"
       end
     end
     if @redo_player_loop
@@ -482,14 +487,14 @@ class Blackjack
     while dealer_hit
       puts
       puts "Dealer's total #{@dealer.hand_total}"
-      if @dealer.hand_total >= 17 && @dealer.hand_total <= 21 && @dealer.soft_17? == false
+      binding.pry
+      if @dealer.hand_total >= 17 && @dealer.hand_total <= 21 && @dealer.soft_17? != true
           dealer_hit = false
       end
     
       if @dealer.hand_total > 21
         puts "Dealer BUSTED!!!"
         dealer_hit = false
-        @dealer_busted = true
       end
 
       if @dealer.hand_total < 17 || (@dealer.hand_total == 17 && @dealer.soft_17?)
@@ -503,14 +508,14 @@ class Blackjack
   def win_lose
     @players.each do | player |
       player.player_hand.each do | num, hand |
-        
+        #binding.pry
         if hand.hand_busted? == false && @dealer.hand_busted? == false
           show_cards_each(player, hand, num)
           puts
           puts "Dealer has: #{@dealer.hand_total}"
         end
 
-        if (hand.hand_total > @dealer.hand_total && hand.hand_busted? == false) || (@dealer.hand_busted? && hand.hand_busted? == false) || (hand.hand_blackjack? && @dealer.hand_blackjack == false)
+        if (hand.hand_total > @dealer.hand_total && hand.hand_busted? == false) || (@dealer.hand_busted? && hand.hand_busted? == false) || (hand.hand_blackjack? && @dealer.hand_blackjack? == false)
           puts
           puts "#{player.name}'s hand # #{num.to_i + 1} WINS bet of #{player.bet_size[num]} !!!"
           if hand.hand_blackjack?
@@ -568,7 +573,7 @@ class Blackjack
       player.hand_played.delete_if { | key, value | key.include? "a" }
     end
     @dealer.hand_clear
-    @temp.hand_clear
+    @temp.hand_clear if @temp != nil
     @players.each do | player |
       player.bet_size.each do | num, bet |
         player.bet_clear(num)
@@ -587,7 +592,8 @@ class Blackjack
       card_shuffle(@how_many_decks.to_i)
     end
 
-    replay if play_again == "y"
+    @play = false if play_again == "n"
+    clear_hands
   end
 end
 
